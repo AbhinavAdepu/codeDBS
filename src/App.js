@@ -1,6 +1,6 @@
 import React from "react";
 import { Component } from "react";
-import Select from "react-select";
+import AsyncSelect from "react-select/async";
 import Dropdown from "./CustomComponent/DropDown";
 const countriesList = [
   { label: "India" },
@@ -29,6 +29,22 @@ export default class App extends Component {
     options: countriesList,
     loadMoreState: 5
   };
+  async componentDidMount() {
+    fetch("https://ajayakv-rest-countries-v1.p.rapidapi.com/rest/v1/all", {
+      method: "GET",
+      headers: {
+        "x-rapidapi-host": "ajayakv-rest-countries-v1.p.rapidapi.com",
+        "x-rapidapi-key": "6152e3b8e7msh116ca3439c27a84p1a4b32jsn1709a4ad95cb"
+      }
+    })
+      .then(res => res.json())
+      .then(repos => {
+        console.log(repos);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
   toggleOpen = () => {
     this.setState(state => ({ isOpen: !state.isOpen }));
   };
@@ -48,16 +64,35 @@ export default class App extends Component {
     });
   };
 
+  /*  debounce = (fn, delay) => {
+    let timeOutID;
+    return function(...args) {
+      if (timeOutID) clearTimeout(timeOutID);
+      setTimeout(function() {
+        fn(...args);
+      }, delay);
+    };
+  }; */
   //Add your search logic here.
-  customFilter = (option, inputValue) => {
-    return option.label.toLowerCase().includes(inputValue.toLowerCase());
+  customFilter = inputValue => {
+    return this.state.options.filter(i =>
+      i.label.toLowerCase().includes(inputValue.toLowerCase())
+    );
   };
+
+  promiseOptions = inputValue =>
+    new Promise(resolve => {
+      setTimeout(() => {
+        resolve(this.customFilter(inputValue));
+      }, 1000);
+    });
 
   addCountry = () => {
     countriesList.push({ label: this.state.inputVal });
     this.onSelectChange({ label: this.state.inputVal });
     this.setState({ options: countriesList, inputVal: "" });
   };
+
   render() {
     const { isOpen, loadMoreState, value, options, inputVal } = this.state;
     return (
@@ -99,7 +134,7 @@ export default class App extends Component {
             margin: "0 auto"
           }}
         >
-          <Select
+          <AsyncSelect
             noOptionsMessage={() => {
               return (
                 <div
@@ -127,18 +162,16 @@ export default class App extends Component {
             onChange={this.onSelectChange}
             onInputChange={this.handleInputChange.bind(this)}
             autoFocus
-            isClearable={true}
             backspaceRemovesValue={false}
-            components={{ DropdownIndicator, IndicatorSeparator: null }}
             controlShouldRenderValue={false}
             hideSelectedOptions={false}
             menuIsOpen
-            options={options.slice(0, loadMoreState)}
             placeholder="Search..."
+            isOptionSelected={(selOpt, selOptArr) => false}
             styles={selectStyles}
-            tabSelectsValue={false}
-            value={this.state.inputVal}
-            filterOption={this.customFilter}
+            cacheOptions
+            defaultOptions={options.slice(0, loadMoreState)}
+            loadOptions={this.promiseOptions}
           />
           {loadMoreState !== options.length && (
             <div
@@ -163,17 +196,6 @@ const Svg = p => (
     role="presentation"
     {...p}
   />
-);
-const DropdownIndicator = () => (
-  <div css={{ color: "#000", height: 24, width: 32 }}>
-    <Svg>
-      <path
-        d="M16.436 15.085l3.94 4.01a1 1 0 0 1-1.425 1.402l-3.938-4.006a7.5 7.5 0 1 1 1.423-1.406zM10.5 16a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11z"
-        fill="currentColor"
-        fillRule="evenodd"
-      />
-    </Svg>
-  </div>
 );
 const ChevronDown = () => (
   <Svg style={{ marginRight: -6 }}>
