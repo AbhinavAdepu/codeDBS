@@ -1,0 +1,22 @@
+[
+  {
+    "id": "cn-1",
+    "country": "India",
+    "isSelectable": true
+  },
+  {
+    "id": "cn-2",
+    "country": "Japan",
+    "isSelectable": false
+  },
+  {
+    "id": "cn-3",
+    "country": "USA",
+    "isSelectable": true
+  },
+  {
+    "id": "cn-4",
+    "country": "UAE",
+    "isSelectable": true
+  }
+]
